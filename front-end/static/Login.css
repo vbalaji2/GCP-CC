@@ -1,0 +1,124 @@
+body {
+  background-color:#FFFF00;
+  background-image: url("bg1.jpg");
+  padding: 50px;
+  margin: 20px;
+}
+body h1 {
+    color:#00FFFF;
+    text-align: center;
+}
+h1, h2, p, ul, li {
+  font-family: Times New Roman;
+}
+ul.header li {
+  display: inline;
+  list-style-type: none;
+  margin: 0;
+}
+ul.header {
+  background-color: #111;
+  padding: 0;
+}
+ul.header li a {
+  color: #FFF;
+  font-weight: bold;
+  text-decoration: none;
+  padding: 20px;
+  display: inline-block;
+}
+.btn-group{
+  text-align: center;
+  display: block;
+}
+.gsignin{
+  text-align: center;
+  margin: 20px 560px;
+}
+.g-signin2{
+  text-align: center;
+}
+#username{
+  text-align: right;
+  color:#00FFFF;
+  padding-bottom: 50px;
+}
+.abcRioButtonContentWrapper{
+  text-align: center;
+}
+.map{
+  text-align: center;
+}
+.content {
+  background-color: #FFF;
+  padding: 20px;
+}
+.content h2 {
+  padding: 0;
+  margin: 0;
+}
+.content li {
+  margin-bottom: 10px;
+}
+.button1{
+  text-align: center;
+  padding:50px;
+}
+.customer-button{
+  border: none;
+  color: white;
+  padding: 40px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: block;
+  font-size: 20px;
+  font-style: oblique;
+  font-weight: bold;
+  font-family: "Times New Roman", Times, serif;
+}
+.service-button{
+  border: none;
+  color: white;
+  padding: 10px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: block;
+  font-size: 20px;
+  font-style: oblique;
+  font-weight: bold;
+  font-family: "Times New Roman", Times, serif;
+}
+.logout_button{
+  border: none;
+  color: white;
+  padding: 10px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: block;
+  font-size: 20px;
+  font-style: oblique;
+  font-weight: bold;
+  font-family: "Times New Roman", Times, serif;
+}
+.createevent_button{
+  border: none;
+  color: white;
+  padding: 40px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: block;
+  font-size: 20px;
+  font-style: oblique;
+  font-weight: bold;
+  font-family: "Times New Roman", Times, serif;
+}
+.active {
+  background-color: #0099FF;
+}
+
+p {
+  text-align: center;
+  color: white;
+  font-family: Times New Roman;
+  font-size: 30px;
+}

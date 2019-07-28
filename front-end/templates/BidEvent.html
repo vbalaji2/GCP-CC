@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  	<meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, shrink-to-fit=no">
+          <title>Welcome user</title>
+              <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='Login.css') }}">
+  </head>
+  <body>
+  	<p>BidAway</p>
+    <label id = "Name">Event Name : </label>
+    <label id = "eventName"></label><br/>
+    <label id = "Name">Event Bid Amount : </label>
+    <label id = "eventBidAmount"></label><br/>
+    <p>
+   <div id="bidding"> </div>
+ </p>
+    <script type="text/javascript">
+          getEvent();
+          var eventID;
+          var event ={};
+          var servicesToBid = [];
+      function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
+
+      async function getEvent(){
+        var query = window.location.search.substring(1);
+        eventID = query.split("=")[1];
+        console.log(eventID);
+        event = await getEventFromDB(eventID)
+        document.getElementById("eventName").innerHTML = event['Name'];
+        document.getElementById("eventBidAmount").innerHTML = event['Budget'];
+        CreateBIDForm(event['services']);
+      }
+
+      async function getEventFromDB(eventID){
+          var request = new XMLHttpRequest()
+          var event = {};
+          var url = 'https://eventeasy.appspot.com/event/'+eventID;
+          console.log(url)
+          // Open a new connection, using the GET request on the URL endpoint
+          request.open('GET', url, true)
+
+          request.onload = function () {
+            // Begin accessing JSON data here
+          if (request.status >= 200 && request.status < 400) {
+            event = JSON.parse(this.response);
+            console.log("response is " + this.response)
+          } else {
+            console.log('error')
+          }
+        }
+
+          //Send request
+          await request.send();
+          await sleep(2000);
+          return event;
+      }
+
+      function CreateBIDForm(services){
+        var servicesNeeded = Object.keys(services);
+        var content = document.getElementById("bidding");
+
+        for(var i = 0; i < servicesNeeded.length; i++){
+          console.log(servicesNeeded[i] + " " + services[servicesNeeded[i]])
+          if(services[servicesNeeded[i]]){
+            servicesToBid.push(servicesNeeded[i]);
+            var newlabel = document.createElement("Label");
+            newlabel.setAttribute("for",i);
+            newlabel.innerHTML = servicesNeeded[i];
+            newlabel.setAttribute("style","padding-right: 15px;")
+            content.appendChild(newlabel); 
+
+            var tabbreak = document.createElement('nbsp');
+            content.appendChild(tabbreak);
+            content.appendChild(tabbreak);
+
+            var bidValue = document.createElement("input");
+            bidValue.setAttribute("type", "text");
+            // bidValue.setAttribute("value", "");
+            bidValue.setAttribute("id", servicesNeeded[i]);
+            bidValue.setAttribute("style", "width:200px");
+            content.appendChild(bidValue);
+
+            var messagebreak = document.createElement('p');
+            content.appendChild(messagebreak);
+         }
+        }
+      }
+
+      function SubmitBid(){
+
+        var update_json = "";
+        console.log(servicesToBid);
+
+        // update_json += "{\"Bid\": {";
+        if(!('Bid' in event)){
+          update_json += "{\"Bid\": {";
+          for(var i = 0; i < servicesToBid.length; i++){
+            update_json += "\"" + servicesToBid[i] + "\" : {\"BidAmt\" : " +
+                            document.getElementById(servicesToBid[i]).value +
+                            ", \"SP\" :\"" + sessionStorage.getItem("emailId") + "\" }," 
+
+          }
+          update_json = update_json.substring(0, update_json.length-1) + "}, \"emailId\": \"" + event["emailId"] + "\"}";
+        }
+
+        else {
+          not_updated_bids = [];
+          update_json_bid = event["Bid"];
+          for(var i = 0; i < servicesToBid.length; i++){
+
+              entered_bid = document.getElementById(servicesToBid[i]).value;
+              entered_bid_int = parseInt(entered_bid);
+
+              if(entered_bid_int > event["Bid"][servicesToBid[i]]["BidAmt"]){
+                not_updated_bids.push(servicesToBid[i]);
+              }
+
+              else
+              {
+                update_json_bid[servicesToBid[i]]["BidAmt"] = entered_bid;
+              }
+
+          }
+          update_json = {};
+          update_json["Bid"] = update_json_bid;
+          update_json["emailId"] = event["emailId"];
+          update_json = JSON.stringify(update_json);
+        }
+
+
+        console.log(update_json);
+
+        var request = new XMLHttpRequest()
+        var url = 'https://eventeasy.appspot.com/event/' + eventID;
+        console.log(url)
+       // Open a new connection, using the GET request on the URL endpoint
+        request.open('PUT', url, true)
+        request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+
+        request.onload = function () {
+          // Begin accessing JSON data here
+          var data = JSON.parse(this.response)
+          console.log(data);
+          window.location = "ServicesList.html";
+        if (request.status >= 200 && request.status < 400) {
+            console.log(data)
+        } else {
+          console.log('error in creating user')
+        }
+          }
+        // Send request
+        request.send(update_json);
+      }
+    </script>
+    <button type="button", onclick="SubmitBid()">Submit Bid</button>
+  </body>
+  </html>

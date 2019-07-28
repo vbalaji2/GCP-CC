@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  	<meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, shrink-to-fit=no">
+          <title>Welcome user</title>
+              <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='Login.css') }}">
+
+    <style>
+      #map {
+        height: 50%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 10px;
+        padding: 0;
+      }
+      #logout{
+        text-align:center;
+        margin:20px 560px;
+      }
+      #content {
+       border: 1px solid black;
+       outline-style: solid;
+       outline-color: black;
+       padding:10px;
+      }
+      #description {
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+      }
+
+      #infowindow-content .title {
+        font-weight: bold;
+      }
+
+      #infowindow-content {
+        display: none;
+      }
+
+      #map #infowindow-content {
+        display: inline;
+      }
+
+      .pac-card {
+        margin: 10px 10px 0 0;
+        border-radius: 2px 0 0 2px;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        outline: none;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        background-color: #fff;
+        font-family: Roboto;
+      }
+
+      #pac-container {
+        padding-bottom: 12px;
+        margin-right: 12px;
+      }
+
+      .pac-controls {
+        display: inline-block;
+        padding: 5px 11px;
+      }
+
+      .pac-controls label {
+        font-family: Roboto;
+        font-size: 13px;
+        font-weight: 300;
+      }
+
+      #pac-input {
+        background-color: #fff;
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+        margin-left: 12px;
+        padding: 0 11px 0 13px;
+        text-overflow: ellipsis;
+        width: 400px;
+      }
+
+      #pac-input:focus {
+        border-color: #4d90fe;
+      }
+
+      #title {
+        color: #fff;
+        background-color: #4d90fe;
+        font-size: 25px;
+        font-weight: 500;
+        padding: 6px 12px;
+      }
+      #target {
+        width: 345px;
+      }
+    </style>
+
+  </head>
+  <body>
+  	<p> Hello and welcome</p>
+    <div id="username"></div> 
+    <div id="content"></div>
+    <button id="logout" onclick="logout()">LOGOUT</button>
+    <script>
+       display();
+
+      
+      // async function getEvents(){
+
+      // var event_list = null;
+      // var request = new XMLHttpRequest()
+
+      // // Open a new connection, using the GET request on the URL endpoint
+      // request.open('GET', 'https://eventeasy.appspot.com/event', true)
+
+      // request.onload = function () {
+      //   // Begin accessing JSON data here 
+
+      // if (request.status >= 200 && request.status < 400) {
+      //   var event_list = JSON.parse(this.response);
+      //   JSON.parse(this.response, function (key, value) {
+      //     console.log(key + " " + value);
+      //   });
+      // } else {
+      //   console.log('error')
+      // }
+      //   }
+
+      // //Send request
+      // request.send()
+      // return event_list;
+      // }
+
+      function addUserToDB(){
+        var request = new XMLHttpRequest()
+
+       // Open a new connection, using the GET request on the URL endpoint
+        request.open('POST', 'https://eventeasy.appspot.com/userCustomer', true)
+        request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+        var obj = new Object();
+        obj.name = sessionStorage.getItem('username');
+        obj.emailId = sessionStorage.getItem('emailId');
+
+        request.onload = function () {
+          // Begin accessing JSON data here
+          var data = JSON.parse(this.response)
+
+        if (request.status >= 200 && request.status < 400) {
+            console.log(data)
+        } else {
+          console.log('error in creating user')
+        }
+          }
+
+        // Send request
+        request.send(JSON.stringify(obj));
+      }
+
+      async function addEventToDB(){
+        var request = new XMLHttpRequest()
+
+       // Open a new connection, using the GET request on the URL endpoint
+        request.open('POST', 'https://eventeasy.appspot.com/event', true)
+        request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+        var event = new Object();
+        var event_form = document.forms["eventform"];
+        var eventName = event_form.elements["eventName"];
+        console.log("Event name : " + eventName.value);
+        event.Name = eventName.value;
+
+        var eventStartDate = event_form.elements["eventStartDate"];
+        event.StartDate = eventStartDate.value.toString();
+
+        var eventStartTime = event_form.elements["eventStartTime"];
+        event.StartTime = eventStartTime.value.toString();
+
+        var eventEndDate = event_form.elements["eventEndDate"];
+        event.EndDate = eventEndDate.value.toString();
+
+        var eventEndTime = event_form.elements["eventEndTime"];
+        event.EndTime = eventEndTime.value.toString();
+
+        var eventBudget = event_form.elements["eventbudget"];
+        event.Budget = eventBudget.value.toString();
+
+        event.services = new Object();
+        event.services.Food = document.getElementById("Food").checked;
+        event.services.Decoration = document.getElementById("Decoration").checked;
+        event.services.Entertainment = document.getElementById("Entertainment").checked;
+        event.services.Photography = document.getElementById("Photography").checked;
+        event.services.Drinks = document.getElementById("Drinks").checked;
+        event.services.ReturnGift = document.getElementById("ReturnGift").checked;
+        
+        var eventnumGuests = event_form.elements["eventnumGuests"];
+        event.NumGuests = eventnumGuests.value.toString();
+
+        var eventBidEndDate = event_form.elements["eventBidEndDate"];
+        event.BidEndDate = eventBidEndDate.value.toString();
+
+        var eventBidEndTime = event_form.elements["eventBidEndTime"];
+        event.BidEndTime = eventBidEndTime.value.toString();
+
+        // var eventLocation = event_form.elements["eventLocation"];
+        event.location = new Object();
+        event.location.name = document.getElementById("pac-input").value;
+        event.location.place_id = sessionStorage.getItem("place_id").toString();
+        event.location.url = sessionStorage.getItem("url").toString();
+
+        sessionStorage.removeItem("place_id");
+        sessionStorage.removeItem("url");
+
+        var eventinfo = event_form.elements["eventinfo"];
+        event.eventinfo = eventinfo.value.toString();
+
+        event.emailId = sessionStorage.getItem("emailId");
+        
+        request.onload = function () {
+          // Begin accessing JSON data here
+          //var data = JSON.parse(this.response);
+          console.log("Event saved : " + this.response);
+        if (request.status >= 200 && request.status < 400) {
+           // console.log(data)
+           window.location = "existingUser.html";
+        } else {
+          console.log('error in creating user')
+        }
+      }
+
+        // // Send request
+        console.log(event);
+        sessionStorage.setItem("dummy", event);
+         request.send(JSON.stringify(event));
+         await sleep(5000);
+      }
+
+      function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
+
+      async function display(){
+        console.log(document.getElementById("username"))
+        document.getElementById("username").innerText = sessionStorage.getItem("username");
+        // console.log("isWaiting?");
+
+          addUserToDB();
+          // Fetching HTML Elements in Variables by ID.
+          var content = document.getElementById("content");
+          var createform = document.createElement('form'); // Create New Element Form
+          createform.setAttribute("name", "eventform"); // Setting Action Attribute on Form
+          // createform.setAttribute("action", ""); // Setting Action Attribute on Form
+          createform.setAttribute("onsubmit", "validateForm()"); // Setting Action Attribute on Form
+          createform.setAttribute("method", "GET"); // Setting Method Attribute on Form
+          content.appendChild(createform);
+
+          //<div id ="form1">
+
+          var heading = document.createElement('h2'); // Heading of Form
+          heading.innerHTML = "Event Form ";
+          createform.appendChild(heading);
+
+          var messagelabel = document.createElement('label'); // Append Textarea
+          messagelabel.innerHTML = "Event Name : ";
+          createform.appendChild(messagelabel);
+          var inputelement = document.createElement('input'); // Create Input Field for Name
+          inputelement.setAttribute("type", "text");
+          inputelement.setAttribute("name", "eventName");
+          createform.appendChild(inputelement);
+
+          var messagebreak = document.createElement('br');
+          createform.appendChild(messagebreak);
+          var messagebreak = document.createElement('br');
+          createform.appendChild(messagebreak);
+
+          var messagelabel = document.createElement('label'); // Append Textarea
+          messagelabel.innerHTML = "Event Start date : ";
+          createform.appendChild(messagelabel);
+          var start_date = document.createElement('input');
+          start_date.setAttribute("type", "date");
+          start_date.setAttribute("name", "eventStartDate");
+          createform.appendChild(start_date);
+
+          var messagebreak = document.createElement('br');
+          createform.appendChild(messagebreak);
+          var messagebreak = document.createElement('br');
+          createform.appendChild(messagebreak);
+
+          var messagelabel = document.createElement('label'); // Append Textarea
+          messagelabel.innerHTML = "Event Start Time : ";
+          createform.appendChild(messagelabel);
+          var start_time = document.createElement('input');
+          start_time.setAttribute("type", "time");
+          start_time.setAttribute("name", "eventStartTime");
+          createform.appendChild(start_time);
+
+          var messagebreak = document.createElement('br');
+          createform.appendChild(messagebreak);
+          var messagebreak = document.createElement('br');
+          createform.appendChild(messagebreak);
+
+          var messagelabel = document.createElement('label'); // Append Textarea
+          messagelabel.innerHTML = "Event End date : ";
+          createform.appendChild(messagelabel);
+          var end_date = document.createElement('input');
+          end_date.setAttribute("type", "date");
+          end_date.setAttribute("name", "eventEndDate");
+          createform.appendChild(end_date);
+
+          var messagebreak = document.createElement('br');
+          createform.appendChild(messagebreak);
+          var messagebreak = document.createElement('br');
+          createform.appendChild(messagebreak);
+
+          var messagelabel = document.createElement('label'); // Append Textarea
+          messagelabel.innerHTML = "Event End Time : ";
+          createform.appendChild(messagelabel);
+          var end_time = document.createElement('input');
+          end_time.setAttribute("type", "time");
+          end_time.setAttribute("name", "eventEndTime");
+          createform.appendChild(end_time);
+
+          var messagebreak = document.createElement('br');
+          createform.appendChild(messagebreak);
+          var messagebreak = document.createElement('br');
+          createform.appendChild(messagebreak);
+
+          var messagelabel = document.createElement('label'); // Append Textarea
+          messagelabel.innerHTML = "Budget : $";
+          createform.appendChild(messagelabel);
+          var budget = document.createElement('input');
+          budget.setAttribute("type", "number");
+          budget.setAttribute("name", "eventbudget");
+          createform.appendChild(budget);
+
+          var messagebreak = document.createElement('br');
+          createform.appendChild(messagebreak);
+          var messagebreak = document.createElement('br');
+          createform.appendChild(messagebreak);
+
+          var messagelabel = document.createElement('label'); // Append Textarea
+          messagelabel.innerHTML = "Expected number of guests : ";
+          createform.appendChild(messagelabel);
+          var numGuests = document.createElement('input');
+          numGuests.setAttribute("type", "number");
+          numGuests.setAttribute("name", "eventnumGuests");
+          createform.appendChild(numGuests);
+
+          var messagebreak = document.createElement('br');
+          createform.appendChild(messagebreak);
+          var messagebreak = document.createElement('br');
+          createform.appendChild(messagebreak);
+
+          var messagelabel = document.createElement('label'); // Append Textarea
+          messagelabel.innerHTML = "Bid End date : ";
+          createform.appendChild(messagelabel);
+          var bid_end_date = document.createElement('input');
+          bid_end_date.setAttribute("type", "date");
+          bid_end_date.setAttribute("name", "eventBidEndDate");
+          createform.appendChild(bid_end_date);
+
+          var messagebreak = document.createElement('br');
+          createform.appendChild(messagebreak);
+          var messagebreak = document.createElement('br');
+          createform.appendChild(messagebreak);
+
+          var messagelabel = document.createElement('label'); // Append Textarea
+          messagelabel.innerHTML = "Bid End time : ";
+          createform.appendChild(messagelabel);
+          var bid_end_time = document.createElement('input');
+          bid_end_time.setAttribute("type", "time");
+          bid_end_time.setAttribute("name", "eventBidEndTime");
+          createform.appendChild(bid_end_time);
+
+          var messagebreak = document.createElement('br');
+          createform.appendChild(messagebreak);
+          var messagebreak = document.createElement('br');
+          createform.appendChild(messagebreak);
+
+          //event location
+    //       var messagelabel = document.createElement('label'); // Append Textarea
+    //       messagelabel.innerHTML = "Event location : ";
+    //       createform.appendChild(messagelabel);
+    // //       <input id="pac-input" class="controls" type="text" placeholder="Search Box">
+    // // <div id="map"></div>
+    //       var event_location = document.createElement('input');
+    //       event_location.setAttribute("id", "pac-input");
+    //       event_location.setAttribute("class", "controls");
+    //       event_location.setAttribute("type", "text");
+    //       event_location.setAttribute("placeholder", "SearchBox");
+    //       event_location.setAttribute("name", "eventLocation");
+    //       createform.appendChild(event_location);
+
+    //       var event_location_div = document.createElement('div');
+    //       event_location_div.setAttribute("id", "map");
+    //       createform.appendChild(event_location_div);
+
+    //       var messagebreak = document.createElement('br');
+    //       createform.appendChild(messagebreak);
+    //       var messagebreak = document.createElement('br');
+    //       createform.appendChild(messagebreak);
+          //event location ends
+
+          var messagelabel = document.createElement('label'); // Append Textarea
+          messagelabel.innerHTML = "Enter extra information of event (if any) : " ;
+          createform.appendChild(messagelabel);
+          var messagelabel = document.createElement('label'); // Append Textarea
+          messagelabel.innerHTML = "Your Message : ";
+          createform.appendChild(messagelabel);
+
+          var texareaelement = document.createElement('textarea');
+          texareaelement.setAttribute("name", "eventinfo");
+          createform.appendChild(texareaelement);
+
+          var messagebreak = document.createElement('br');
+          createform.appendChild(messagebreak);
+          var messagebreak = document.createElement('br');
+          createform.appendChild(messagebreak);
+
+          // var submitelement = document.createElement('input'); // Append Submit Button
+          // submitelement.setAttribute("type", "submit");
+          // submitelement.setAttribute("name", "eventFormSubmit");
+          // submitelement.setAttribute("value", "Submit");
+          // createform.appendChild(submitelement);
+
+          var messagebreak = document.createElement('br');
+          createform.appendChild(messagebreak);
+          var messagebreak = document.createElement('br');
+          createform.appendChild(messagebreak);
+
+          //</div>
+          //content gets filled up with new form 
+          // var form = document.createElement("form");
+          // var button = document.createElement("button");
+          // button.innerText = "Submit";
+          // form.appendChild(button);
+
+          // document.getElementById("content").appendChild(form);
+
+          //form contents to firebase
+      }//end of display
+
+        async function validateForm() {
+            var x = document.forms["eventform"]["eventName"].value;
+            if (x == "") {
+              alert("Event Name must be filled out");
+              return false;
+            }
+
+            var today = new Date();
+            var currdate = today.getFullYear()+'-'+('0' + (today.getMonth()+1)).slice(-2)+'-'+('0' + today.getDate()).slice(-2);
+            console.log(currdate);
+            var eventStartDate = document.forms["eventform"]["eventStartDate"].value;
+            console.log(eventStartDate);
+            console.log(currdate > eventStartDate);
+            if(eventStartDate < currdate) {
+              alert("Invalid Event Start Date");
+              return false;
+            }
+
+            var eventEndDate = document.forms["eventform"]["eventEndDate"].value;
+            if(eventEndDate < eventStartDate) {
+              alert("Invalid Event End Date");
+              return false;
+            }
+
+            var eventStartTime = document.forms["eventform"]["eventStartTime"].value;
+            var eventEndTime = document.forms["eventform"]["eventEndTime"].value;
+
+            if(eventStartDate == eventEndDate && eventEndTime <= eventStartTime){
+              alert("Invalid Event Times");
+              return false;
+            }
+
+            var eventBidEndDate = document.forms["eventform"]["eventBidEndDate"].value;
+            if(eventStartDate <= eventBidEndDate){
+              alert("Invalid Bid end date: Bidding should end before start of the event");
+              return false;
+            }
+
+            var budget = document.forms["eventform"]["eventbudget"].value;
+            if(budget <= 0) {
+              alert("Invalid Budget: Budget can't be less than or equal to 0");
+              return false;
+            }
+
+            var numGuests = document.forms["eventform"]["eventnumGuests"].value;
+            if(numGuests <= 0) {
+              alert("Invalid Number of Guests: Guests can't be less than or equal to 0");
+              return false;
+            }
+
+            //validation done. Store in firebase
+            console.log("I'm here");
+            addEventToDB();
+            await sleep(3000);
+            // window.location="existingUser.html";
+            // return true;
+          }
+      
+      function logout(){
+        sessionStorage.removeItem("username");
+        window.location="/";
+        
+
+      }
+
+
+    function initAutocomplete() {
+        var map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: -33.8688, lng: 151.2195},
+          zoom: 13,
+          mapTypeId: 'roadmap'
+        });
+
+        // Create the search box and link it to the UI element.
+        var input = document.getElementById('pac-input');
+        var searchBox = new google.maps.places.SearchBox(input);
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+        // Bias the SearchBox results towards current map's viewport.
+        map.addListener('bounds_changed', function() {
+          searchBox.setBounds(map.getBounds());
+        });
+
+        var markers = [];
+        // Listen for the event fired when the user selects a prediction and retrieve
+        // more details for that place.
+        searchBox.addListener('places_changed', function() {
+          var places = searchBox.getPlaces();
+          console.log(places);
+          console.log(places[0].place_id); 
+          console.log(places[0].url); 
+
+          sessionStorage.setItem("place_id", places[0].place_id);
+          sessionStorage.setItem("url", places[0].url);
+
+
+          if (places.length == 0) {
+            return;
+          }
+
+          // Clear out the old markers.
+          markers.forEach(function(marker) {
+            marker.setMap(null);
+          });
+          markers = [];
+
+          // For each place, get the icon, name and location.
+          var bounds = new google.maps.LatLngBounds();
+          places.forEach(function(place) {
+            if (!place.geometry) {
+              console.log("Returned place contains no geometry");
+              return;
+            }
+            var icon = {
+              url: place.icon,
+              size: new google.maps.Size(71, 71),
+              origin: new google.maps.Point(0, 0),
+              anchor: new google.maps.Point(17, 34),
+              scaledSize: new google.maps.Size(25, 25)
+            };
+
+            // Create a marker for each place.
+            markers.push(new google.maps.Marker({
+              map: map,
+              icon: icon,
+              title: place.name,
+              position: place.geometry.location
+            }));
+
+            if (place.geometry.viewport) {
+              // Only geocodes have viewport.
+              bounds.union(place.geometry.viewport);
+            } else {
+              bounds.extend(place.geometry.location);
+            }
+          });
+          map.fitBounds(bounds);
+        });
+      }
+
+      // function addLoctoFirebase(){
+
+      //     //add place_id and url to firebase
+
+
+      //     sessionStorage.removeItem("place_id");
+      //     sessionStorage.removeItem("url");
+      // }
+
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAMeR2UH-oSg5u4-CDz_OnUymFXQghe5wE&libraries=places&callback=initAutocomplete"
+         async defer></script>
+    <input id="pac-input" class="controls" type="text" name="eventLocation" placeholder="Search Box">
+    <div id="map"></div>
+    <div class="service">
+    <label> Services Expected </label><br>
+    <input type="checkbox" name="Service1" id="Food"> Food<br>
+    <input type="checkbox" name="Service2" id="Decoration"> Decoration<br>
+    <input type="checkbox" name="Service3" id="Entertainment"> Entertainment<br>
+    <input type="checkbox" name="Service4" id="Photography"> Photography<br>
+    <input type="checkbox" name="Service5" id="Drinks"> Drinks<br>
+    <input type="checkbox" name="Service6" id="ReturnGift"> Return Gifts<br>
+    <!-- <input type="checkbox" name="Service2" value="Decoration"> Decoration<br>
+    <input type="checkbox" name="Service2" value="Decoration">  Decoration<br> -->
+    </div>
+    <div id="service1">
+    <button type="button", onclick="validateForm()">Submit</button>
+    </div>
+  </body>
+  </html>

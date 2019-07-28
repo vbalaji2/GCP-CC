@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  	<meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, shrink-to-fit=no">
+          <title>Welcome user</title>
+              <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='Login.css') }}">
+  </head>
+  <body>
+  	<p> Hello!Welcome </p>
+    <div id="username"></div>
+    <div class="customer-button">
+      <button type="button", onclick="customer()">Login as Customer</button>
+    </div>
+    <div class="service-button">	
+	<button type="button", onclick="serviceProvider()">Login as Service Provider</button>
+    </div>
+    <script>
+      console.log(document.getElementById("username"))
+      document.getElementById("username").innerText = sessionStorage.getItem("username");
+
+      function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
+
+      async function getCustomer(){
+      var request = new XMLHttpRequest()
+      var result = false;
+      // Open a new connection, using the GET request on the URL endpoint
+      request.open('GET', 'https://eventeasy.appspot.com/listCustomer', true)
+
+      request.onload = function () {
+        // Begin accessing JSON data here
+      if (request.status >= 200 && request.status < 400) {
+         JSON.parse(this.response, function (key, value) {
+          console.log(key + " " + value);
+          if(key == 'emailId' && value == sessionStorage.getItem('emailId')){
+            result = true;
+          }
+        });
+      } else {
+        console.log('error')
+      }
+    }
+
+      //Send request
+      await request.send();
+      await sleep(2000);
+      return result;
+      }
+
+      async function getUser(){
+        var request = new XMLHttpRequest()
+        var result = false;
+        // Open a new connection, using the GET request on the URL endpoint
+        request.open('GET', 'https://eventeasy.appspot.com/listServiceProvider', true)
+
+        request.onload = function () {
+          // Begin accessing JSON data here
+        if (request.status >= 200 && request.status < 400) {
+           JSON.parse(this.response, function (key, value) {
+            console.log(key + " " + value + "-" +sessionStorage.getItem('emailId'));
+            if(key == 'emailId' && value == sessionStorage.getItem('emailId')){
+              result = true;
+            }
+          });
+        } else {
+          console.log('error')
+        }
+      }
+
+        //Send request
+        await request.send();
+        await sleep(2000);
+        return result;
+      }
+
+      async function customer(){
+        sessionStorage.setItem("type", "customer");
+        // notifyviaEmail();
+        var isUserPresent = await getCustomer();
+        if(isUserPresent == false){
+          window.location = "customer.html";
+        }
+        else{
+          window.location = "existingUser.html";
+        }
+      }
+
+      async function serviceProvider(){
+        sessionStorage.setItem("type", "serviceProvider");
+        var isUserPresent = await getUser();
+
+        if(isUserPresent == false){
+          window.location = "serviceProvider.html";
+        }
+        else{
+          window.location = "ServicesList.html";
+        }
+      }
+        
+      // }
+
+    </script>
+  </body>
+  </html>
